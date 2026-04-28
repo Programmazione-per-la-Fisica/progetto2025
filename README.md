@@ -306,6 +306,7 @@ Chi è ammesso alla prova orale è pregato di attenersi alle seguenti linee guid
 - Installi sul portatile una versione del progetto d'esame coerente con quella
   consegnata e verifichi che compili prima del colloquio.
 - Disabiliti *Copilot* o qualsiasi funzionalità analoga nel sua IDE di sviluppo.
+- Sia pronto all'uso di [Compiler Explorer](https://godbolt.org/) nel browser.
 
 ## Uso di sistemi di Intelligenza Artificiale
 
