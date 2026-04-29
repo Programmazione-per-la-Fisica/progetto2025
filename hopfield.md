@@ -117,7 +117,7 @@ Si parte da uno dei pattern memorizzati e lo si corrompe in uno di questi modi:
 La rete aggiorna lo stato dei neuroni uno alla volta (aggiornamento asincrono) seguendo questa regola:
 
 ```math
-s_i(t+1) = \operatorname{sign}\!\left(\sum_{j=1}^{N} W_{ij}\, s_j(t)\right)
+s_i(t+1) = \text{sign}\!\left(\sum_{j=1}^{N} W_{ij}\, s_j(t)\right)
 ```
 
 dove $s_i(t)$ è lo stato del neurone $i$ al tempo $t$. In parole semplici: ogni neurone guarda la "somma pesata" degli stati di tutti gli altri neuroni. Se questa somma è positiva, il neurone si porta a $+1$; se è negativa, si porta a $-1$.
@@ -195,7 +195,7 @@ h_1 = W_{12}s_2 + W_{13}s_3 + W_{14}s_4
     = (-\tfrac{1}{2})(-1) + (-\tfrac{1}{2})(1) + (\tfrac{1}{2})(-1)
     = \tfrac{1}{2} - \tfrac{1}{2} - \tfrac{1}{2} = -\tfrac{1}{2}
 ```
-$s_1' = \operatorname{sign}(-\tfrac{1}{2}) = -1$ ✓
+$s_1' = \text{sign}(-\tfrac{1}{2}) = -1$ ✓
 
 **Neurone 2:**
 ```math
@@ -203,7 +203,7 @@ h_2 = W_{21}s_1' + W_{23}s_3 + W_{24}s_4
     = (-\tfrac{1}{2})(-1) + (\tfrac{1}{2})(1) + (-\tfrac{1}{2})(-1)
     = \tfrac{3}{2}
 ```
-$s_2' = \operatorname{sign}(\tfrac{3}{2}) = +1$ ✓
+$s_2' = \text{sign}(\tfrac{3}{2}) = +1$ ✓
 
 **Neurone 3** e **Neurone 4** si aggiornano in modo analogo e restano rispettivamente $+1$ e $-1$.
 
@@ -242,13 +242,13 @@ m^\mu(t) = \frac{1}{N} \sum_{j=1}^{N} \xi_j^\mu\, s_j(t)
 L'overlap $m^\mu$ misura quanto lo stato corrente $s(t)$ assomiglia al pattern $\xi^\mu$: vale $+1$ se coincidono perfettamente, $-1$ se sono opposti, $0$ se sono ortogonali. Con questa notazione, la regola di aggiornamento standard diventa equivalente a:
 
 ```math
-s_i(t+1) = \operatorname{sign}\!\left(\sum_{\mu=1}^{P} m^\mu(t)\; \xi_i^\mu\right)
+s_i(t+1) = \text{sign}\!\left(\sum_{\mu=1}^{P} m^\mu(t)\; \xi_i^\mu\right)
 ```
 
 Il problema è che i pattern spuri (stati misti con due overlap simili, $m^1 \approx m^2$) sono punti fissi stabili di questa equazione. La soluzione più semplice è **sostituire** $m^\mu$ con una funzione superlineare $f(m^\mu)$:
 
 ```math
-s_i(t+1) = \operatorname{sign}\!\left(\sum_{\mu=1}^{P} f(m^\mu)\; \xi_i^\mu\right)
+s_i(t+1) = \text{sign}\!\left(\sum_{\mu=1}^{P} f(m^\mu)\; \xi_i^\mu\right)
 ```
 
 La scelta più elementare è $f(m) = m^3$. Intuitivamente: se $m^1 = 0.6$ e $m^2 = 0.6$ (stato misto), dopo la cubing si ha $f(m^1) = f(m^2) = 0.216$ e lo stato rimane instabile, mentre qualsiasi piccola perturbazione che avvicina la rete a uno dei due pattern viene amplificata, portando alla convergenza verso il pattern puro. Per un pattern puro, invece ($m^1 \approx 1$, tutti gli altri $\approx 0$), la non linearità non cambia il risultato: $f(1) = 1$.
