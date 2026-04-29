@@ -267,7 +267,7 @@ P(\text{flip}) = \frac{1}{1 + e^{\,\Delta E / T}}
 
 dove $T$ è un parametro che gioca il ruolo di temperatura. Se $\Delta E < 0$ (il flip abbassa l'energia), il cambio viene quasi sempre accettato. Se $\Delta E > 0$ (il flip aumenta l'energia), viene accettato solo con una piccola probabilità. Questo meccanismo permette alla rete di **uscire da minimi locali spuri**, a costo di rallentare la convergenza.
 
-### Simulated Annealing (ricottura simulata)
+### Simulated Annealing
 
 Si estende l'approccio di Metropolis introducendo una temperatura $T$ che **decresce gradualmente** nel tempo, seguendo uno schema detto *schedule di raffreddamento*. Inizialmente, con $T$ alta, la rete esplora liberamente lo spazio degli stati; man mano che $T$ scende, il sistema si assesta progressivamente verso stati di energia sempre più bassa. L'analogia fisica è la ricottura dei metalli: riscaldando e poi raffreddando lentamente un materiale, gli atomi trovano la configurazione cristallina di minima energia.
 
