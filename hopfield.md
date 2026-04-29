@@ -52,7 +52,7 @@ Per ogni pixel, si calcola la media delle tre componenti di colore:
 \text{grigio} = \frac{R + G + B}{3}
 ```
 
-Se il valore supera una soglia (tipicamente 127), il pixel diventa $+1$ (chiaro); altrimenti diventa $-1$ (scuro). L'immagine viene poi "srotolata" in un vettore monodimensionale leggendo i pixel riga per riga, ottenendo il pattern $\xi^\mu \in \{-1, +1\}^N$.
+Se il valore supera una soglia (tipicamente 127), il pixel diventa $+1$ (chiaro); altrimenti diventa $-1$ (scuro). L'immagine viene poi "srotolata" in un vettore monodimensionale leggendo i pixel riga per riga, ottenendo il pattern $\xi^\mu$.
 
 L'indice $\mu$ identifica il pattern (da 1 al numero totale $P$ di immagini), l'indice $i$ identifica il neurone (da 1 a $N$). Il valore del neurone $i$ nel pattern $\mu$ si indica con $\xi_i^\mu$.
 
