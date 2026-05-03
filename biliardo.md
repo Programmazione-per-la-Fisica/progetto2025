@@ -17,7 +17,7 @@ $[(0, -r_1), (\ell, -r_2)]$ rispettivamente.
 Una particella puntiforme inizia a muoversi, con velocità costante, lungo la
 direzione descritta dall'angolo $\theta_0$. Tale particella parte da $(0, y_0)$,
 $y_0 \in [-r_1, r_1]$, e interagisce nel punto $(x_\mathrm{i}, y_\mathrm{i})$
-con uno dei due segmenti di delimitazione (ne caso descritto in figura, con
+con uno dei due segmenti di delimitazione (nel caso descritto in figura, con
 quello superiore). L'interazione consiste in una riflessione (urto elastico),
 per cui $\theta_\mathrm{i} = \theta_\mathrm{r}$, dove $\theta_\mathrm{i}$ e
 $\theta_\mathrm{r}$ rappresentano rispettivamente gli angoli incidente e
@@ -48,15 +48,18 @@ Il programma deve offrire le seguenti funzionalità:
   relative alla posizione $(x = \ell, y_\mathrm{f})$, così come l'angolo
   $\theta_\mathrm{f}$ che definisce la direzione del moto della particella
   all'uscita del biliardo. Le particelle che, in base alla dinamica del sistema,
-  dovessero rimbalzare all'indietro verso $x = 0$ si possono ignorate.
+  dovessero rimbalzare all'indietro verso $x = 0$ vanno ignorate.
 
 - Supponendo che le condizioni iniziali siano caratterizzate da due
   distribuzioni Gaussiane indipendenti, rispettivamente definite dai parametri
   $(\mu_{y_0}, \sigma_{y_0})$ e $(\mu_{\theta_0}, \sigma_{\theta_0})$, il
   programma deve determinare (generando un numero programmabile $N$ di
   simulazioni del moto di una singola particella) le distribuzioni di
-  $y_\mathrm{f}$ e $\theta_\mathrm{f}$ e calcolarne, media, deviazione standard,
+  $y_\mathrm{f}$ e $\theta_\mathrm{f}$ e calcolarne media, deviazione standard,
   coefficiente di simmetria e di appiattimento.
 
 Infine, studiare (e documentare nella relazione) come variano le distribuzioni al
 variare di $\ell$, qualora si mantengano costanti $r_1$ e $r_2$.
+
+Si suggerisce di implementare una rappresentazione grafica (ad es. con SFML) almeno della
+dinamica di una singola particella, date le coordinate e l'angolo di partenza.
