@@ -26,6 +26,7 @@ I progetti proposti riguardano:
 - [Simulazione del comportamento di stormi](boids.md)
 - [Dinamica in un biliardo triangolare](biliardo.md)
 - [Rete neurale di Hopfield](hopfield.md)
+- [Simulazione di un sistema a N-corpi](n-corpi.md)
 
 È possibile presentare il progetto su un altro tema a propria scelta, purché di
 complessità paragonabile e concordato preventivamente con i docenti.
