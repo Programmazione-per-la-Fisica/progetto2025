@@ -26,7 +26,7 @@ $$
 F = G\frac{m_1m_2}{r^2}, \quad r = |\vec{r}_1-\vec{r}_2|
 $$
 
-dove $G\approx 6.67\times 10^{-11} \, Nm^2kg^{-2}$ è la costante di gravitazione universale.
+dove $G\approx 6.67\times 10^{-11}\ Nm^2kg^{-2}$ è la costante di gravitazione universale.
 
 Nonostante l'apparente semplicità di questo problema, nel corso dei secoli è
 stata trovata una soluzione analitica esclusivamente per sistemi a due corpi,
