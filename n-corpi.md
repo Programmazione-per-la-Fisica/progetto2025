@@ -91,7 +91,7 @@ $$
 mentre l'energia potenziale è ottenuta sommando i contributi dati da ogni coppia di corpi
 
 $$
-U = -\sum_{i<j}G\frac{m_im_j}{|\vec{r}_i-\vec{r}_j|}
+U = - \sum_{i < j} G \frac{m_i m_j}{\left| \vec{r}_i - \vec{r}_j \right|}
 $$
 
 notando che sommiamo su $i<j$ per evitare di considerare le coppie due volte.
