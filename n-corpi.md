@@ -26,7 +26,7 @@ $$
 F = G\frac{m_1m_2}{r^2}, \quad r = |\vec{r}_1-\vec{r}_2|
 $$
 
-dove $G\approx 6.67\times 10^{-11}\,Nm^2kg^{-2}$ è la costante di gravitazione universale.
+dove $G\approx 6.67\times 10^{-11}\ Nm^2kg^{-2}$ è la costante di gravitazione universale.
 
 Nonostante l'apparente semplicità di questo problema, nel corso dei secoli è
 stata trovata una soluzione analitica esclusivamente per sistemi a due corpi,
@@ -91,7 +91,7 @@ $$
 mentre l'energia potenziale è ottenuta sommando i contributi dati da ogni coppia di corpi
 
 $$
-U = -\sum_{i<j}G\frac{m_im_j}{|\vec{r}_i-\vec{r}_j|}
+U = - \sum_{i < j} G \frac{m_i m_j}{\left| \vec{r}_i - \vec{r}_j \right|}
 $$
 
 notando che sommiamo su $i<j$ per evitare di considerare le coppie due volte.
