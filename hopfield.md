@@ -1,4 +1,3 @@
-<!-- omit in toc -->
 # Rete neurale di Hopfield
 
 - [Descrizione del problema](#descrizione-del-problema)
@@ -6,229 +5,277 @@
 - [2. Fase di apprendimento](#2-fase-di-apprendimento)
 - [3. Fase di richiamo](#3-fase-di-richiamo)
 - [Esempio semplificato](#esempio-semplificato)
-  - [Passo 1: Inizializzazione](#passo-1-inizializzazione)
-  - [Passo 2: Matrice dei pesi con la regola di Hebb](#passo-2-matrice-dei-pesi-con-la-regola-di-hebb)
-  - [Passo 3: Richiamo di un pattern rumoroso](#passo-3-richiamo-di-un-pattern-rumoroso)
 - [Limitazioni del modello](#limitazioni-del-modello)
 - [Possibili estensioni del modello](#possibili-estensioni-del-modello)
 - [Riferimenti utili](#riferimenti-utili)
 
+---
+
 ## Descrizione del problema
 
-Una **rete neurale di Hopfield** è un tipo di rete neurale ricorrente introdotta da John J. Hopfield nel 1982. Queste reti sono progettate per funzionare come sistemi di memoria associativa: sono capaci di "ricordare" pattern immagazzinati e di correggere input distorti o incompleti, convergendo verso lo stato memorizzato più simile. Le reti di Hopfield sono composte da neuroni completamente connessi tra loro, con pesi simmetrici e senza auto-connessioni. Ogni neurone aggiorna il proprio stato in base agli stati degli altri neuroni, seguendo una dinamica che porta il sistema a minimizzare una _funzione di energia_, fino a raggiungere una convergenza. Il lavoro originale di John J. Hopfield: [Hopfield, "Neural networks and physical systems with emergent collective computational abilities" (1982)](https://www.pnas.org/doi/10.1073/pnas.79.8.2554)
+Una **rete neurale di Hopfield** è un tipo di rete neurale ricorrente introdotta da John J. Hopfield nel 1982. Funziona come una **memoria associativa**: la rete impara a riconoscere certi schemi (detti *pattern*) e, quando le viene mostrato uno schema parziale o rumoroso, riesce a ricostruire quello originale completo.
 
-L'obiettivo generale del progetto è sviluppare una rete neurale di Hopfield capace di memorizzare, richiamare e correggere pattern binari.  
-Le attività descritte possono essere suddivise anche in tre programmi distinti, ognuno dedicato a una singola fase del processo.
+Immagina di cercare di ricordare una canzone sentendo solo poche note: il cervello ricostruisce automaticamente il resto. Le reti di Hopfield funzionano in modo analogo.
 
-1. **Acquisizione dei pattern**
-Leggere immagini o pattern di input, convertirli in formato binario (valori -1 o +1) e prepararli per l'elaborazione da parte della rete. Se i pattern hanno dimensioni diverse, essi devono essere ridimensionati per uniformare le loro dimensioni, garantendo che tutti i pattern abbiano la stessa risoluzione prima della conversione in binario.
+Dal punto di vista fisico, il sistema è composto da $N$ neuroni, ciascuno dei quali può trovarsi in uno di due stati: acceso ($+1$) o spento ($-1$). I neuroni sono tutti collegati tra loro con connessioni simmetriche (se $A$ è connesso a $B$, allora $B$ è connesso ad $A$ con la stessa intensità). La rete evolve nel tempo seguendo una **regola di aggiornamento** che porta il sistema a minimizzare una funzione di energia, in modo del tutto analogo a un sistema fisico che si assesta nel suo stato di minima energia.
 
-2. **Fase di training**
-Addestrare la rete memorizzando i pattern binari in una matrice dei pesi, secondo la regola di apprendimento di Hebb, e salvare questa matrice su file per un uso successivo.
+Il riferimento originale: [Hopfield, "Neural networks and physical systems with emergent collective computational abilities" (1982)](https://www.pnas.org/doi/10.1073/pnas.79.8.2554)
 
-3. **Fase di recall e analisi della convergenza**
-A partire da un pattern noto:
+Il progetto si articola in tre fasi principali:
 
-- Introdurre rumore, invertendo casualmente alcuni pixel, oppure corrompere il pattern invertendo un'intera porzione dell'immagine;
+1. **Acquisizione dei pattern** — leggere le immagini e convertirle in vettori binari di ±1.
+2. **Apprendimento** — calcolare la matrice dei pesi $W$ che codifica i pattern nella memoria della rete.
+3. **Richiamo** — partire da un pattern corrotto o incompleto e lasciare evolvere la rete fino alla convergenza.
 
-- Caricare la matrice dei pesi precedentemente salvata e tentare di ricostruire il pattern corretto, facendo convergere il sistema verso uno dei pattern memorizzati;
-
-- Monitorare l'andamento del processo calcolando una _funzione di energia_ ad ogni iterazione, verificando che essa diminuisca progressivamente fino a raggiungere un minimo, indicando la stabilizzazione della rete.
+---
 
 ## 1. Acquisizione dei pattern
 
-La fase di Input/Output ha l'obiettivo di preparare i pattern binari da utilizzare per l'addestramento e il richiamo della rete neurale.
+Prima di poter addestrare la rete, bisogna preparare i dati. Ogni immagine di input viene convertita in un vettore di valori ±1, che è il formato che la rete sa elaborare.
 
-- **Caricamento dei pattern**  
-Ogni immagine di input (ad esempio file PNG a colori) viene caricata accedendo direttamente ai pixel, ad esempio tramite una libreria grafica come SFML. 
-- **Uniformazione delle dimensioni**  
-Affinché la rete possa trattare correttamente i diversi pattern, **tutti** devono avere la stessa dimensione $N$ (intesa come numero di pixel). Se le immagini iniziali hanno dimensioni diverse, è necessario ridimensionarle.  
-Alcuni approcci possibili sono:
-  - **Metodo semplice**: rimozione regolare di righe e colonne di pixel, ad esempio eliminando ogni $k$-esima riga/colonna per adattare la dimensione.
-  - **Metodo più accurato**: ridimensionamento tramite **interpolazione bilineare**, che calcola i valori dei pixel nuovi combinando in modo pesato i pixel adiacenti, garantendo una migliore qualità visiva del pattern ridimensionato.
-- **Costruzione del pattern binario**
-Per ogni pixel, il valore binario viene determinato mediando le componenti $R$, $G$, $B$ (tutte comprese tra 0 e 255) del colore. Se il valore medio supera una soglia prefissata (e.g. 127), il pixel viene considerato acceso ($+1$), altrimenti spento ($-1$). L'immagine binarizzata viene poi "srotolata" in un vettore monodimensionale di lunghezza $N$, ottenuto leggendo i pixel riga per riga.  
-Il pattern associato a ciascuna immagine viene indicato come $x_i^\mu$, dove:
-  - $i$ varia da $1$ a $N$ ed è l'indice dei neuroni (pixel),
-  - $\mu$ varia da $1$ al numero totale di pattern memorizzati.
-- **Visualizzazione dei pattern**  
-È utile fornire strumenti per visualizzare sia il pattern originale che quello binarizzato e srotolato, per controllare visivamente la correttezza del processo di conversione come possiamo vedere nella figura.
+### Caricamento dell'immagine
 
-<div style="text-align: center;"> <img src="orecchino.png" alt="Immagine originale" width="20%"> <img src="hopfield-output.png" alt="Pattern binario recuperato" width="20%"></div>
+Le immagini vengono caricate pixel per pixel, ad esempio tramite la libreria grafica SFML. Ogni pixel è descritto da tre valori: le componenti di colore rosso ($R$), verde ($G$) e blu ($B$), ciascuna compresa tra 0 e 255.
+
+### Uniformazione delle dimensioni
+
+La rete richiede che tutti i pattern abbiano la stessa lunghezza $N$ (numero totale di pixel). Se le immagini di partenza hanno dimensioni diverse, è necessario ridimensionarle prima della conversione. Due strategie possibili:
+
+- **Metodo semplice**: rimuovere regolarmente righe e colonne, ad esempio eliminare ogni $k$-esima riga e colonna finché non si raggiunge la dimensione desiderata.
+- **Metodo più accurato (interpolazione bilineare)**: il valore di ogni pixel nella nuova immagine viene calcolato come media pesata dei pixel vicini nell'immagine originale. Produce risultati visivamente migliori, ma è più complesso da implementare.
+
+### Binarizzazione
+
+Per ogni pixel, si calcola la media delle tre componenti di colore:
+
+```math
+\text{grigio} = \frac{R + G + B}{3}
+```
+
+Se il valore supera una soglia (tipicamente 127), il pixel diventa $+1$ (chiaro); altrimenti diventa $-1$ (scuro). L'immagine viene poi "srotolata" in un vettore monodimensionale leggendo i pixel riga per riga, ottenendo il pattern $\xi^\mu$.
+
+L'indice $\mu$ identifica il pattern (da 1 al numero totale $P$ di immagini), l'indice $i$ identifica il neurone (da 1 a $N$). Il valore del neurone $i$ nel pattern $\mu$ si indica con $\xi_i^\mu$.
+
+### Visualizzazione
+
+È utile visualizzare sia l'immagine originale che quella binarizzata per verificare che la conversione sia corretta.
+
+<div style="text-align: center;">
+  <img src="orecchino.png" alt="Immagine originale" width="20%">
+  <img src="hopfield-output.png" alt="Pattern binario recuperato" width="20%">
+</div>
+
+---
 
 ## 2. Fase di apprendimento
 
-La fase di apprendimento consiste nel costruire la memoria della rete neurale tramite il calcolo della matrice dei pesi $W$.
+L'obiettivo di questa fase è costruire la matrice dei pesi $W$, che rappresenta la "memoria" della rete. Ogni elemento $W_{ij}$ descrive quanto è forte la connessione tra il neurone $i$ e il neurone $j$.
 
-- **Calcolo della matrice dei pesi $W$**
-  La matrice viene calcolata applicando la **regola di Hebb**, che associa a ogni coppia di neuroni un valore proporzionale alla correlazione tra i loro stati nei diversi pattern memorizzati. La formula esplicita è:
+### La regola di Hebb
+
+La regola usata per costruire $W$ si chiama **regola di Hebb**, ispirata all'idea biologica che "neuroni che si attivano insieme si connettono insieme". In pratica, se due neuroni tendono ad avere lo stesso valore in molti pattern memorizzati, la loro connessione sarà forte e positiva; se tendono ad avere valori opposti, sarà forte e negativa.
+
+La formula esplicita è:
 
 ```math
-W_{ij} = 
+W_{ij} =
 \begin{cases}
-\frac{1}{N} \sum\limits_{\mu=1}^{P} x_i^\mu x_j^\mu & \quad \text{se } i \neq j\\
-0 & \quad \text{se } i = j
+\dfrac{1}{N} \displaystyle\sum_{\mu=1}^{P} \xi_i^\mu\, \xi_j^\mu & \text{se } i \neq j \\[10pt]
+0 & \text{se } i = j
 \end{cases}
 ```
 
-  dove $x_i^\mu$ rappresenta il valore del neurone $i$ nel pattern $\mu$, $N$ è il numero totale di neuroni (dimensione del pattern srotolato), $P$ è il numero totale di pattern che si vogliono memorizzare.
+La diagonale è posta a zero per evitare che un neurone si influenzi da solo. La divisione per $N$ è una normalizzazione che mantiene i pesi in un intervallo ragionevole indipendentemente dalla dimensione del pattern.
 
-- **Proprietà della matrice $W$**  
-  La matrice $W$ è **simmetrica**, ovvero:
+### Proprietà della matrice
 
-```math
-W_{ij} = W_{ji} \quad \forall i,j
-```
+La matrice $W$ è **simmetrica**: $W_{ij} = W_{ji}$ per ogni coppia di neuroni. Questo è fondamentale perché garantisce che la funzione di energia (introdotta nella fase di richiamo) non possa mai aumentare durante l'evoluzione della rete.
 
-- **Salvataggio della matrice dei pesi**  
-  Dopo aver completato il calcolo, è possibile **salvare la matrice dei pesi $W$** su un file.  
-  Questo permette di evitare di ripetere la fase di apprendimento ogni volta, ricaricando direttamente la rete già addestrata per la fase di richiamo.
+### Salvataggio
+
+Dopo il calcolo, la matrice $W$ viene salvata su file. Questo evita di ripetere la fase di apprendimento ogni volta: basterà caricare la matrice già calcolata per avviare il richiamo.
+
+---
 
 ## 3. Fase di richiamo
 
-A questo punto, la rete neurale è stata addestrata e possiede una memoria costruita sulla base dei pattern di training. La fase di richiamo consiste nel presentare alla rete un **pattern corrotto** o **tagliato** e verificare se la rete è in grado di riconoscerlo e correggerlo, associandolo a uno dei pattern che ha memorizzato.
+La rete è ora addestrata. In questa fase, le viene presentato un pattern corrotto o incompleto, e lasciamo che evolva spontaneamente verso uno dei pattern memorizzati.
 
-- **Preparazione del pattern corrotto**  
-  Si possono implementare funzioni che, dato un pattern di input, lo **corrompono** (invertendo casualmente alcuni pixel) oppure lo **tagliano** (modificando sistematicamente una parte del pattern), simulando situazioni in cui l'informazione è parziale o rumorosa.
-  <div style="text-align: center;"><img src="hopfield-input.png" alt="Immagine originale" width="20%"></div>
-  
-- **Dinamica di aggiornamento**  
-  La rete aggiorna lo stato di ciascun neurone seguendo la regola di Hopfield:
+### Preparazione del pattern corrotto
 
-```math
-x_i(t+1) = \text{sign}\left(\sum_j W_{ij} x_j(t) \right)
-```
+Si parte da uno dei pattern memorizzati e lo si corrompe in uno di questi modi:
 
-  dove $t$ rappresenta l'indice temporale delle iterazioni, $x_i(t)$ è lo stato (valore binario $-1$ o $+1$) del neurone $i$ al tempo $t$, il valore di $x_i(t+1)$ dipende dalla funzione segno (che restituisce -1 se l'argiomento è negativo, +1 altrimenti) della somma pesata degli stati degli altri neuroni al tempo $t$.
+- **Rumore casuale**: si invertono casualmente alcuni pixel (si cambiano alcuni $+1$ in $-1$ e viceversa), simulando un'immagine distorta.
+- **Taglio**: si inverte sistematicamente una porzione dell'immagine (ad esempio la metà inferiore), simulando un'immagine parziale.
 
-- **Criterio di convergenza**  
-  Il processo di aggiornamento viene **ripetuto iterativamente** finché il pattern **non converge**, ovvero finché:
+<div style="text-align: center;">
+  <img src="hopfield-input.png" alt="Pattern corrotto" width="20%">
+</div>
 
-```math
-x_i(t+1) = x_i(t) \quad \forall i
-```
+### Dinamica di aggiornamento
 
-  In altre parole, l'aggiornamento non cambia più lo stato della rete da un'iterazione all'altra.
-
-- **Monitoraggio dell'evoluzione**  
-  Durante il processo di richiamo, è utile visualizzare:
-  - Il pattern corrotto iniziale,
-  - L'evoluzione del pattern a ogni iterazione (ad esempio frame per frame),
-  - Il pattern finale raggiunto dopo la convergenza.
-
-- **Introduzione della funzione energia**  
-  Per analizzare l'andamento della rete durante il richiamo, si può introdurre una **funzione energia** definita come:
+La rete aggiorna lo stato dei neuroni uno alla volta (aggiornamento asincrono) seguendo questa regola:
 
 ```math
-E(t) = -\frac{1}{2} \sum_{i,j} W_{ij} x_i(t) x_j(t)
+s_i(t+1) = \text{sign}\!\left(\sum_{j=1}^{N} W_{ij}\, s_j(t)\right)
 ```
 
-  Questa "energia" non corrisponde a un'energia fisica reale, ma è un'analogia: rappresenta una misura della "stabilità" della rete. Durante il richiamo, la funzione energia **decresce** o **rimane costante** a ogni iterazione, e il processo di richiamo si conclude quando l'energia raggiunge un minimo locale. Monitorare $E(t)$ permette di verificare se e come la rete sta convergendo verso uno stato stabile.
+dove $s_i(t)$ è lo stato del neurone $i$ al tempo $t$. In parole semplici: ogni neurone guarda la "somma pesata" degli stati di tutti gli altri neuroni. Se questa somma è positiva, il neurone si porta a $+1$; se è negativa, si porta a $-1$.
+
+Questo processo viene ripetuto iterativamente fino alla convergenza.
+
+### Criterio di convergenza
+
+La rete ha raggiunto uno stato stabile quando un'intera iterazione non produce alcun cambiamento:
+
+```math
+s_i(t+1) = s_i(t) \quad \forall\, i
+```
+
+A quel punto la rete si è assestata in un minimo della funzione di energia, che corrisponde idealmente a uno dei pattern memorizzati.
+
+### Funzione di energia
+
+Per monitorare il processo, si introduce la **funzione di energia**:
+
+```math
+E(t) = -\frac{1}{2} \sum_{i,j} W_{ij}\, s_i(t)\, s_j(t)
+```
+
+Questa grandezza non è un'energia fisica nel senso termodinamico, ma è un'analogia matematica molto utile: si può dimostrare che, grazie alla simmetria di $W$, la funzione $E$ **non può mai aumentare** durante l'evoluzione della rete con aggiornamento asincrono. Ogni aggiornamento porta il sistema verso un minimo locale, e il processo termina quando un minimo è raggiunto.
+
+Monitorare $E(t)$ ad ogni iterazione permette di verificare che la convergenza stia avvenendo correttamente: il grafico deve essere sempre decrescente o costante.
+
+---
 
 ## Esempio semplificato
 
-Abbiamo due pattern binari che vogliamo memorizzare nella rete:
+Consideriamo una rete con soli 4 neuroni ($N = 4$) e due pattern memorizzati ($P = 2$):
 
 ```math
-x^{(1)} = (-1,1,1, -1)\\ 
-x^{(2)} = (1, -1, -1, 1)
+\xi^{(1)} = (-1,\; 1,\; 1,\; -1)
+\qquad
+\xi^{(2)} = (1,\; -1,\; -1,\; 1)
 ```
 
-### Passo 1: Inizializzazione
+Nota che $\xi^{(2)} = -\xi^{(1)}$: i due pattern sono opposti.
 
-Costruiamo una matrice dei pesi $W$ di dimensione $4 \times 4$ (poiché abbiamo 4 neuroni).  
-Impostiamo **tutti gli elementi sulla diagonale a zero** per evitare auto-connessioni, cioè:
+### Passo 1: calcolo della matrice dei pesi
+
+Si applica la regola di Hebb. La matrice è $4 \times 4$ con diagonale nulla. Per ogni coppia $(i,j)$ con $i \neq j$:
 
 ```math
-W_{ij} = 0 \quad \text{per} \quad i = j
+W_{ij} = \frac{1}{4}\left(\xi_i^{(1)}\xi_j^{(1)} + \xi_i^{(2)}\xi_j^{(2)}\right)
 ```
 
-### Passo 2: Matrice dei pesi con la regola di Hebb
-Utilizziamo la **regola di Hebb** per aggiornare i pesi considerando tutti i pattern:
+| Coppia | Contributo pattern 1 | Contributo pattern 2 | $W_{ij}$ |
+|--------|----------------------|----------------------|----------|
+| $W_{12}$ | $(-1)(1) = -1$ | $(1)(-1) = -1$ | $-1/2$ |
+| $W_{13}$ | $(-1)(1) = -1$ | $(1)(-1) = -1$ | $-1/2$ |
+| $W_{14}$ | $(-1)(-1) = 1$ | $(1)(1) = 1$   | $+1/2$ |
+| $W_{23}$ | $(1)(1) = 1$   | $(-1)(-1) = 1$ | $+1/2$ |
+| $W_{24}$ | $(1)(-1) = -1$ | $(-1)(1) = -1$ | $-1/2$ |
+| $W_{34}$ | $(1)(-1) = -1$ | $(-1)(1) = -1$ | $-1/2$ |
+
+Gli elementi non elencati si ricavano per simmetria ($W_{ji} = W_{ij}$).
+
+### Passo 2: richiamo da pattern corrotto
+
+Supponiamo di presentare alla rete questo pattern corrotto (il primo bit è sbagliato rispetto a $\xi^{(1)}$):
 
 ```math
-W_{ij} = \frac{1}{N} \sum_{\mu=1}^{P} x_i^\mu x_j^\mu
+s_{\text{iniziale}} = (1,\; -1,\; 1,\; -1)
 ```
 
-dove:
-- $N$ è il numero di neuroni (4),
-- $P$ è il numero di pattern memorizzati (2).
+Si aggiornano i neuroni uno alla volta:
 
-Calcoliamo $w_{ij}$ per ciascuna coppia $(i,j)$:
+**Neurone 1:**
+```math
+h_1 = W_{12}s_2 + W_{13}s_3 + W_{14}s_4
+    = (-\tfrac{1}{2})(-1) + (-\tfrac{1}{2})(1) + (\tfrac{1}{2})(-1)
+    = \tfrac{1}{2} - \tfrac{1}{2} - \tfrac{1}{2} = -\tfrac{1}{2}
+```
+$s_1' = \text{sign}(-\tfrac{1}{2}) = -1$ ✓
 
-| Coppia | Calcolo Pattern 1 | Calcolo Pattern 2 | $W_{ij}$ |
-|--------|-------------------|-------------------|----------|
-| $W_{12}$ | $x_1^{(1)} \cdot x_2^{(1)} = -1$ | $x_1^{(2)} \cdot x_2^{(2)} = -1$ | $-1/2$ |
-| $W_{13}$ | $x_1^{(1)} \cdot x_3^{(1)} = -1$ | $x_1^{(2)} \cdot x_3^{(2)} = -1$ | $-1/2$ |
-| $W_{14}$ | $x_1^{(1)} \cdot x_4^{(1)} = 1$  | $x_1^{(2)} \cdot x_4^{(2)} = 1$ | $1/2$ |
-| $W_{23}$ | $x_2^{(1)} \cdot x_3^{(1)} = 1$  | $x_2^{(2)} \cdot x_3^{(2)} = 1$ | $1/2$ |
-| $W_{24}$ | $x_2^{(1)} \cdot x_4^{(1)} = -1$ | $x_2^{(2)} \cdot x_4^{(2)} = -1$ | $-1/2$ |
-| $W_{34}$ | $x_3^{(1)} \cdot x_4^{(1)} = -1$ | $x_3^{(2)} \cdot x_4^{(2)} = -1$ | $-1/2$ |
+**Neurone 2:**
+```math
+h_2 = W_{21}s_1' + W_{23}s_3 + W_{24}s_4
+    = (-\tfrac{1}{2})(-1) + (\tfrac{1}{2})(1) + (-\tfrac{1}{2})(-1)
+    = \tfrac{3}{2}
+```
+$s_2' = \text{sign}(\tfrac{3}{2}) = +1$ ✓
 
-**Nota**: Poiché i pesi sono simmetrici ($W_{ij} = W_{ji}$), basta calcolarli una sola volta.
+**Neurone 3** e **Neurone 4** si aggiornano in modo analogo e restano rispettivamente $+1$ e $-1$.
 
-### Passo 3: Richiamo di un pattern rumoroso
-
-Supponiamo di iniziare con un pattern parzialmente corrotto:
+Il pattern finale è:
 
 ```math
-x_{\text{iniziale}} = (1, -1, 1, -1)
+s' = (-1,\; 1,\; 1,\; -1) = \xi^{(1)}
 ```
 
-(dove il primo bit è errato rispetto a $x^{(1)}$).
+La rete ha corretto il bit errato e recuperato il pattern memorizzato.
 
-Ora aggiorniamo un neurone alla volta e applicando la **funzione segno** (ad ogni step il pattern iniziale viene modificato):
-
-```math
-x_1' = \text{sgn}((-1/2) \cdot (-1) + (-1/2) \cdot 1 + 1/2 \cdot (-1)) = \text{sgn}(-1/2)
-```
-
-Risultato: $x_1' = -1$.
-
-```math
-x_2' = \text{sgn}((-1/2) \cdot (-1) + 1/2 \cdot 1 + (-1/2) \cdot (-1)) = \text{sgn}(3/2)
-```
-
-Risultato: $x_2' = 1$.
-
-```math
-x_3' = \text{sgn}((-1/2) \cdot (-1) + 1/2 \cdot 1 + (-1/2) \cdot (-1)) = \text{sgn}(3/2)
-```
-
-Risultato: $x_3' = 1$.
-
-```math
-x_4' = \text{sgn}(1/2 \cdot (-1) + (-1/2) \cdot 1 + (-1/2) \cdot 1) = \text{sgn}(-3/2)
-```
-
-Risultato: $x_4' = -1$.
-
-Quindi, il pattern aggiornato è:
-
-```math
-x' = (-1, 1, 1, -1)
-```
-
-La rete ha corretto il bit sbagliato, recuperando il pattern memorizzato più vicino!
+---
 
 ## Limitazioni del modello
 
-- Il numero massimo di pattern memorizzabili senza errori è limitato a circa $0.138 \times N$, con $N$ numero di neuroni.
-- Possono emergere **stati spuri**, ossia configurazioni stabili non corrispondenti ai pattern memorizzati.
-- La rete gestisce solo pattern binari con valori $-1$ e $+1$.
-- Pattern molto simili tra loro possono confondere la rete durante il richiamo.
-- La convergenza può portare a minimi locali non desiderati invece del pattern corretto.
+- **Capacità limitata**: il numero massimo di pattern che la rete riesce a memorizzare senza errori è circa $0.138 \times N$. Per una rete con 1000 neuroni, si possono memorizzare al massimo circa 138 pattern in modo affidabile.
+
+- **Pattern spuri**: possono comparire stati stabili che non corrispondono ad alcun pattern memorizzato. Questi sono detti *attrattori spuri* e rappresentano il principale difetto del modello. Le principali tipologie sono le *miscele*, stati stabili che corrispondono alla media di un numero dispari di pattern, e gli stati *spin-glass*, configurazioni caotiche senza relazione con i pattern.
+
+- **Pattern troppo simili**: se due pattern memorizzati si assomigliano molto, la rete può confonderli durante il richiamo.
+
+- **Solo valori binari**: il modello standard lavora esclusivamente con stati $\pm 1$.
+
+---
 
 ## Possibili estensioni del modello
 
-- **[Algoritmo di Metropolis-Hastings](https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm)**  
-  Introdurre una dinamica stocastica in cui i flip degli stati dei neuroni avvengono con una certa probabilità, basata sulla variazione di energia.  
-  Questo può aiutare a superare minimi locali spuri, permettendo alla rete di esplorare meglio lo spazio degli stati e trovare il pattern corretto.
+### Sfavorimento dei pattern spuri (campo non lineare)
 
-- **[Aggiunta di rumore termico (Simulated Annealing)](https://en.wikipedia.org/wiki/Simulated_annealing)**  
-  Integrare una "temperatura" che decresce gradualmente per favorire l'esplorazione iniziale e la convergenza finale verso stati di energia minima globale.
+Il campo di aggiornamento della regola standard può essere riscritto senza usare la matrice $W$, calcolando direttamente gli **overlap** tra lo stato attuale e ciascun pattern memorizzato:
+
+```math
+m^\mu(t) = \frac{1}{N} \sum_{j=1}^{N} \xi_j^\mu\, s_j(t)
+```
+
+L'overlap $m^\mu$ misura quanto lo stato corrente $s(t)$ assomiglia al pattern $\xi^\mu$: vale $+1$ se coincidono perfettamente, $-1$ se sono opposti, $0$ se sono ortogonali. Con questa notazione, la regola di aggiornamento standard diventa equivalente a:
+
+```math
+s_i(t+1) = \text{sign}\!\left(\sum_{\mu=1}^{P} m^\mu(t)\; \xi_i^\mu\right)
+```
+
+Il problema è che i pattern spuri (stati misti con due overlap simili, $m^1 \approx m^2$) sono punti fissi stabili di questa equazione. La soluzione più semplice è **sostituire** $m^\mu$ con una funzione superlineare $f(m^\mu)$:
+
+```math
+s_i(t+1) = \text{sign}\!\left(\sum_{\mu=1}^{P} f(m^\mu)\; \xi_i^\mu\right)
+```
+
+La scelta più elementare è $f(m) = m^3$. Intuitivamente: se $m^1 = 0.6$ e $m^2 = 0.6$ (stato misto), dopo la cubing si ha $f(m^1) = f(m^2) = 0.216$ e lo stato rimane instabile, mentre qualsiasi piccola perturbazione che avvicina la rete a uno dei due pattern viene amplificata, portando alla convergenza verso il pattern puro. Per un pattern puro, invece ($m^1 \approx 1$, tutti gli altri $\approx 0$), la non linearità non cambia il risultato: $f(1) = 1$.
+
+Questo approccio porta due vantaggi pratici: elimina la necessità di allocare e memorizzare la matrice $W$ (che occupa $O(N^2)$ memoria), riducendo l'aggiornamento da $O(N^2)$ a $O(NP)$ operazioni per iterazione; e sopprime gli attrattori spuri senza modificare quelli corrispondenti ai pattern memorizzati.
+
+Usando invece $f(m) = \exp(\beta\, m)$ con $\beta$ grande si ottiene la formulazione delle *Modern Hopfield Networks* (Ramsauer et al., 2020), che raggiunge una capacità di memoria esponenziale in $N$.
+
+### Algoritmo di Metropolis-Hastings
+
+Invece di aggiornare ogni neurone in modo deterministico, si introduce una **dinamica stocastica**: il neurone $i$ cambia stato con una probabilità che dipende dalla variazione di energia $\Delta E$ che il flip produrrebbe:
+
+```math
+P(\text{flip}) = \frac{1}{1 + e^{\,\Delta E / T}}
+```
+
+dove $T$ è un parametro che gioca il ruolo di temperatura. Se $\Delta E < 0$ (il flip abbassa l'energia), il cambio viene quasi sempre accettato. Se $\Delta E > 0$ (il flip aumenta l'energia), viene accettato solo con una piccola probabilità. Questo meccanismo permette alla rete di **uscire da minimi locali spuri**, a costo di rallentare la convergenza.
+
+### Simulated Annealing
+
+Si estende l'approccio di Metropolis introducendo una temperatura $T$ che **decresce gradualmente** nel tempo, seguendo uno schema detto *schedule di raffreddamento*. Inizialmente, con $T$ alta, la rete esplora liberamente lo spazio degli stati; man mano che $T$ scende, il sistema si assesta progressivamente verso stati di energia sempre più bassa. L'analogia fisica è la ricottura dei metalli: riscaldando e poi raffreddando lentamente un materiale, gli atomi trovano la configurazione cristallina di minima energia.
+
+---
 
 ## Riferimenti utili
 
-- **[Hopfield Networks is All You Need](https://ml-jku.github.io/hopfield-layers/)**  
-  Una panoramica moderna sulle reti di Hopfield, con estensioni deep learning e connessioni con architetture moderne.
+- [Hopfield, "Neural networks and physical systems with emergent collective computational abilities" (1982)](https://www.pnas.org/doi/10.1073/pnas.79.8.2554) — l'articolo originale.
+- [Hopfield Networks is All You Need](https://ml-jku.github.io/hopfield-layers/) — panoramica moderna sulle reti di Hopfield, con estensioni deep learning e connessioni con le Modern Hopfield Networks.
+- [Wikipedia — Metropolis-Hastings algorithm](https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm)
+- [Wikipedia — Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing)
