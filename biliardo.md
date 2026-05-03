@@ -8,7 +8,7 @@
 
 La geometria del sistema considerato è mostrata in figura:
 
-![biliardo triangolare](biliardo.svg)
+![biliardo triangolare](biliardo.png)
 
 Il sistema è delimitato da due segmenti rettilinei, i cui estremi
 sono definiti dai punti $[(0, r_1), (\ell, r_2)]$ e
