@@ -64,7 +64,7 @@ le orbite del sistema sono ristrette a coppie di valori $(x(t), y(t))$ positivi,
 come mostrato in figura.
 
 Inoltre, la soluzione del sistema di equazioni differenziali presenta due punti
-di equilibrio:
+di equilibrio (evidenziati in arancione):
 
 $$\begin{align*}
 e_{1} &= (0, 0)\\
@@ -83,12 +83,21 @@ H(x,y) &= -D\ln(x)+Cx+By-A\ln(y)
 
 ### Versione discretizzata delle equazioni
 
-Discretizzando le equazioni di Lotka-Volterra si ottiene:
+Discretizzando le equazioni di Lotka-Volterra ed applicando il metodo di
+integrazione
+[Eulero simplettico](https://it.wikipedia.org/wiki/Metodo_di_Eulero_semi-implicito)
+si ottiene:
 
 $$\begin{align*}
-x_i &= x_{i-1} + (A - B  y_{i-1}) x_{i-1} \Delta t\\
 y_i &= y_{i-1} + (C x_{i-1} - D ) y_{i-1} \Delta t\\
+x_i &= x_{i-1} + (A - B  y_{i}) x_{i-1} \Delta t\\
 \end{align*}$$
+
+> [!TIP]
+> Notate l'utilizzo di $y_{i}$ al posto di $y_{i-1}$ nella seconda equazione,
+> come previsto nella descrizione del metodo di integrazione.
+> Questo accorgimento migliora significativamente la stabilità dell'integrale
+> primo $H(x,y)$ relativo all'evoluzione del sistema.
 
 inoltre, esprimendo le variabili $(x_i, y_i)$ come frazione dei valori del punto
 di equilibrio $e_{2}$:
@@ -101,15 +110,15 @@ y_i^{rel} &= y_{i} \frac{B}{A} \\
 le equazioni discretizzate diventano $${\color{green}^{\textbf{[1]}}}$$:
 
 $$\begin{align*}
-x_i^{rel} &= x_{i-1}^{rel} + A (1 - y_{i-1}^{rel}) x_{i-1}^{rel} \Delta t\\
 y_i^{rel} &= y_{i-1}^{rel} + D (x_{i-1}^{rel} - 1) y_{i-1}^{rel} \Delta t\\
+x_i^{rel} &= x_{i-1}^{rel} + A (1 - y_{i}^{rel}) x_{i-1}^{rel} \Delta t\\
 \end{align*}$$
 
 ## Implementazione della simulazione in C++
 
-Viene richiesto di sviluppare una simulazione che, introdotto uno stato
+Viene richiesto di sviluppare una simulazione la quale, introdotto uno stato
 iniziale $(x_0, y_0)$ ed una serie di parametri $A, B, C, D$ **validi**,
-utilizzi la versione discretizzata delle equazioni di Lotka-Volterra 
+utilizzi la versione discretizzata delle equazioni di Lotka-Volterra
 presentata in $${\color{green}^{\textbf{[1]}}}$$ per calcolare, ad ogni passo
 dell'evoluzione, i valori $(x_i, y_i, H_i)$.
 
@@ -126,8 +135,8 @@ classe `Simulation` la quale deve, quantomeno:
 - contenere un metodo `evolve()` che permetta di fare progredire la
   simulazione di una singola unità $\Delta t$;
 - mantenere al suo interno i **valori assoluti** $(x_i, y_i, H_i)$ per **tutti
-  gli stati di evoluzione del sistema** e renderli accessibili all'utente per
-  eventuali stampe su schermo o analisi.
+  gli stati di evoluzione del sistema** e renderli accessibili, dopo che la
+  simulazione è stata eseguita, per eventuali stampe su schermo o analisi.
 
 **In secondo luogo**, al fine di migliorare la stabilità del calcolo numerico,
 si richiede di:
@@ -144,7 +153,7 @@ si richiede di:
 > `Simulation` come $(x_i^{rel}, y_i^{rel}) = (1.2, 1.25)$.
 
 Ogni metodo che **espone gli stati del sistema** per le analisi successive deve
-restituire $x_i$ e $y_i$ espressi come **valori assoluti**.
+però restituire $x_i$ e $y_i$ espressi come **valori assoluti**.
 
 ## Variazioni sul tema
 
