@@ -38,7 +38,10 @@ affrontare numerose altre applicazioni in ambito astronomico.
 
 ## Implementazione numerica
 
-Per questo progetto ci limiteremo a utilizzare due dimensioni. Considerando N corpi di massa $m_i$, denominiamo con $\vec{r}_i, \vec{v}_i, \vec{a}_i$ rispettivamente la loro posizione, velocità e accelerazione. Seguendo le leggi della gravitazione sappiamo che in un certo istante di tempo la forza che agisce su ognuna di queste masse è data dalla somma delle forze che le altre masse esercitano su di essa, ossia
+Per questo progetto ci limiteremo a utilizzare due dimensioni. Considerando N corpi di massa $m_i$, denominiamo con
+$\vec{r}_i$, $\vec{v}_i$, $\vec{a}_i$ rispettivamente la loro posizione, velocità e accelerazione.
+Seguendo le leggi della gravitazione sappiamo che in un certo istante di tempo la forza che agisce su ognuna
+di queste masse è data dalla somma delle forze che le altre masse esercitano su di essa, ossia
 
 $$
 \begin{equation*}
