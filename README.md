@@ -115,7 +115,7 @@ collaborativo e l'adozione di ogni altro strumento utile al miglioramento del
 software prodotto. Se lo sviluppo avviene in una repository *Git*, potete
 indicarne l'indirizzo nella relazione; se la repository è privata ed è tenuta su
 [GitHub](https://github.com/), potete condividerla con noi aggiungendo gli
-account `battibass`, `tommasodiotalevi` e `giacomini`. Naturalmente questo **non**
+account `battibass`, `tommasodiotalevi`, `giacomini` e `slanzi00`. Naturalmente questo **non**
 sostituisce la consegna secondo le modalità indicate sotto.
 
 ## Input/Output
