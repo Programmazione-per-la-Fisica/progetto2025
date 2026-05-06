@@ -67,7 +67,7 @@ sistema di un passo (_step_) sono
 
 $$
 \begin{align*}
-\vec r_i(t+\Delta t) &= \vec r_i(t) + \vec v_i(t)\,\Delta t + \frac{1}{2} \vec a_i(t)\, \Delta t^2, \\
+\vec r_i(t+\Delta t) &= \vec r_i(t) + \vec v_i(t) \Delta t + \frac{1}{2} \vec a_i(t) \Delta t^2, \\
 \vec a_i(t+\Delta t) &= -\sum_{\substack{j=1 \\ j \neq i}}^N G \frac{m_j}{\big(|\vec r_j(t+\Delta t)-\vec r_i(t+\Delta t)|^2 + \epsilon^2\big)^{3/2}} (\vec r_i(t+\Delta t)-\vec r_j(t+\Delta t)), \\
 \vec v_i(t+\Delta t) &= \vec v_i(t) + \frac{1}{2} \Big(\vec a_i(t) + \vec a_i(t+\Delta t)\Big) \Delta t
 \end{align*}
@@ -123,8 +123,8 @@ Infine, il programma deve stampare a schermo o effettuare una visualizzazione gr
 
 $$
 \begin{align*}
-   \vec r_1&=(-0.97000436,\,0.24308753),\quad\vec r_2=(0.97000436,\,-0.24308753),\quad\vec r_3=(0,0) \\
-   \vec v_1&=(0.4662036850,\,0.4323657300),\quad\vec v_2=(0.4662036850,\,0.4323657300),\quad\vec v_3=(-0.93240737,\,-0.86473146)
+   \vec r_1&=(-0.97000436, 0.24308753),\quad\vec r_2=(0.97000436, -0.24308753),\quad\vec r_3=(0,0) \\
+   \vec v_1&=(0.4662036850, 0.4323657300),\quad\vec v_2=(0.4662036850, 0.4323657300),\quad\vec v_3=(-0.93240737, -0.86473146)
 \end{align*}
 $$
 
