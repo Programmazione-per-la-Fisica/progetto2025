@@ -181,10 +181,10 @@ Gli elementi non elencati si ricavano per simmetria ($W_{ji} = W_{ij}$).
 
 ### Passo 2: richiamo da pattern corrotto
 
-Supponiamo di presentare alla rete questo pattern corrotto (il primo bit è sbagliato rispetto a $\xi^{(1)}$):
+Supponiamo di presentare alla rete questo pattern corrotto (il secondo bit è sbagliato rispetto a $\xi^{(1)}$):
 
 ```math
-s_{\text{iniziale}} = (1,\; -1,\; 1,\; -1)
+s_{\text{iniziale}} = (-1,\; -1,\; 1,\; -1)
 ```
 
 Si aggiornano i neuroni uno alla volta:
@@ -199,7 +199,7 @@ $s_1' = \text{sign}(-\tfrac{1}{2}) = -1$ ✓
 
 **Neurone 2:**
 ```math
-h_2 = W_{21}s_1' + W_{23}s_3 + W_{24}s_4
+h_2 = W_{21}s_1 + W_{23}s_3 + W_{24}s_4
     = (-\tfrac{1}{2})(-1) + (\tfrac{1}{2})(1) + (-\tfrac{1}{2})(-1)
     = \tfrac{3}{2}
 ```
